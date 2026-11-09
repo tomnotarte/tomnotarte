@@ -243,6 +243,7 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    gap: 24px;
     padding: 14px 0;
     border-bottom: 1px solid var(--paper-line);
   }
@@ -250,6 +251,7 @@
   .spec-row:last-child { border-bottom: none; }
 
   .spec-label {
+    flex-shrink: 0;
     font-size: 14px;
     color: var(--ink-soft);
   }
@@ -258,6 +260,7 @@
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
     font-size: 26px;
+    text-align: right;
   }
 
   .spec-value span {
