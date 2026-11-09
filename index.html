@@ -934,12 +934,93 @@
     .price-card:hover { transform: none; }
   }
 
+  /* ---------- MOBILE NAV ---------- */
+
+  .nav-toggle { display: none; }
+
+  @media (max-width: 620px) {
+    .nav-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin-right: -10px;
+      padding: 0;
+      background: none;
+      border: 0;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .nav-toggle:focus-visible { outline: 2px solid var(--blueprint); outline-offset: -2px; }
+
+    .nav-toggle-bars,
+    .nav-toggle-bars::before,
+    .nav-toggle-bars::after {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: currentColor;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .nav-toggle-bars { position: relative; }
+
+    .nav-toggle-bars::before,
+    .nav-toggle-bars::after {
+      content: "";
+      position: absolute;
+      left: 0;
+    }
+
+    .nav-toggle-bars::before { transform: translateY(-7px); }
+    .nav-toggle-bars::after { transform: translateY(7px); }
+
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars { background: transparent; }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars::before { background: var(--ink); transform: rotate(45deg); }
+    .nav-toggle[aria-expanded="true"] .nav-toggle-bars::after { background: var(--ink); transform: rotate(-45deg); }
+
+    .nav-meta {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 4px 0 8px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--paper-line);
+      box-shadow: 0 12px 24px rgba(26,43,60,0.1);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    }
+
+    .nav-meta.open {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    .nav-meta a {
+      padding: 14px 24px;
+      font-size: 16px;
+    }
+
+    .nav-meta a::after { display: none; }
+  }
+
+  @media (max-width: 620px) and (prefers-reduced-motion: reduce) {
+    .nav-meta, .nav-toggle-bars, .nav-toggle-bars::before, .nav-toggle-bars::after { transition: none; }
+  }
+
   @media (max-width: 620px) {
     section { padding: 64px 0; }
     :root { --header-h: 56px; }
     .topbar { gap: 12px; }
-    .nav-meta { gap: 14px; }
-    .nav-meta a { font-size: 13px; }
     .hero-body { padding: 32px 0 56px; min-height: auto; }
     .cta-row { flex-direction: column; }
     .cta-row .btn { text-align: center; }
@@ -950,14 +1031,10 @@
 
   @media (max-width: 400px) {
     .logo { font-size: 16px; }
-    .nav-meta { gap: 10px; }
-    .nav-meta a { font-size: 12px; }
   }
 
   @media (max-width: 340px) {
     .logo { font-size: 14px; }
-    .nav-meta { gap: 8px; }
-    .nav-meta a { font-size: 11px; }
   }
 </style>
 </head>
@@ -967,7 +1044,10 @@
   <div class="wrap">
     <div class="topbar">
       <a href="#" class="logo">tomnotarte<span>.</span></a>
-      <div class="nav-meta">
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+        <span class="nav-toggle-bars" aria-hidden="true"></span>
+      </button>
+      <div class="nav-meta" id="site-nav">
         <a href="#work">Work</a>
         <a href="#services">Services</a>
         <a href="#pricing">Pricing</a>
@@ -1536,6 +1616,33 @@
   function onScroll() { siteHeader.classList.toggle('scrolled', window.scrollY > 8); }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
+
+  // Mobile dropdown menu.
+  var navToggle = document.getElementById('nav-toggle');
+  var siteNav = document.getElementById('site-nav');
+
+  function setNavOpen(open) {
+    siteNav.classList.toggle('open', open);
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+
+  navToggle.addEventListener('click', function () {
+    setNavOpen(!siteNav.classList.contains('open'));
+  });
+  siteNav.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setNavOpen(false);
+  });
+  document.addEventListener('click', function (e) {
+    if (!siteHeader.contains(e.target)) setNavOpen(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && siteNav.classList.contains('open')) {
+      setNavOpen(false);
+      navToggle.focus();
+    }
+  });
+  window.matchMedia('(max-width: 620px)').addEventListener('change', function () { setNavOpen(false); });
 
   // Maintenance billing toggle.
   // Monthly rates live in the markup: data-maint-price="..." on each package card.
